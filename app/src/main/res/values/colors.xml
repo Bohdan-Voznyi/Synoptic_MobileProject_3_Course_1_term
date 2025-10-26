@@ -1,5 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Ваші існуючі кольори (black, white, і т.д.) -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- ✅ ДОДАЙТЕ ЦІ КОЛЬОРИ, ЩОБ ВИПРАВИТИ ПОМИЛКИ -->
+    <!-- Кольори для AQI -->
+    <color name="aqi_good">#8BC34A</color>       <!-- Зелений -->
+    <color name="aqi_fair">#FFEB3B</color>       <!-- Жовтий -->
+    <color name="aqi_moderate">#FF9800</color>   <!-- Помаранчевий -->
+    <color name="aqi_poor">#F44336</color>       <!-- Червоний -->
+    <color name="aqi_very_poor">#9C27B0</color> <!-- Пурпурний -->
+    <color name="aqi_unknown">#9E9E9E</color>   <!-- Сірий -->
 </resources>

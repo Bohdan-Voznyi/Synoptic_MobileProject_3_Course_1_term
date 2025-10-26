@@ -1,18 +1,22 @@
 package com.example.sunoptic
 
+import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
-import android.view.Menu // ✅ Імпорт
-import android.view.MenuItem // ✅ Імпорт
-import android.widget.Button // ✅ Імпорт
-import android.widget.EditText // ✅ Імпорт
-import android.widget.ImageButton // ✅ Імпорт
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Button
+import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.Toolbar // ✅ Імпорт
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.sunoptic.network.AirPollutionResponse
 import com.example.sunoptic.network.ForecastResponse
 import com.example.sunoptic.network.WeatherApiService
 import com.example.sunoptic.network.WeatherListItem
@@ -27,25 +31,44 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import androidx.appcompat.app.AlertDialog // ✅ Важливо: переконайтесь, що це не MaterialAlertDialogBuilder для .create()
-import androidx.recyclerview.widget.DividerItemDecoration // ✅ Для розділювача
+import com.example.sunoptic.R // ✅ ВАЖЛИВО: Цей імпорт вирішує помилки з ID
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var apiKey: String
-    // ✅ Змінюємо 'val' на 'var', щоб мати змогу оновлювати місто
-    private var city = "Kyiv"
+    private var city = "Kyiv" // Змінено на var для оновлення
 
-    // Елементи UI
+    // --- Елементи UI ---
+    // Головний екран
     private lateinit var tvCity: TextView
     private lateinit var tvTemperature: TextView
     private lateinit var tvWeatherCondition: TextView
     private lateinit var tvVisibility: TextView
     private lateinit var rvForecast: RecyclerView
     private lateinit var forecastAdapter: ForecastAdapter
-    private lateinit var toolbar: Toolbar // ✅ Новий елемент
+    private lateinit var toolbar: Toolbar
 
+    // Якість повітря (AQI)
+    private lateinit var tvAqiIcon: TextView
+    private lateinit var tvAqiLevel: TextView
+    private lateinit var tvAqiPM25: TextView
+    private lateinit var tvAqiPM10: TextView
+    private lateinit var tvAqiSO2: TextView
+    private lateinit var tvAqiNO2: TextView
+    private lateinit var tvAqiO3: TextView
+    private lateinit var tvAqiCO: TextView
+
+    // --- Дані ---
     private var fullForecastList: List<WeatherListItem> = emptyList()
+
+    // --- Мережа ---
+    private val weatherService: WeatherApiService by lazy {
+        Retrofit.Builder()
+            .baseUrl("https://api.openweathermap.org/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+            .create(WeatherApiService::class.java)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,11 +80,11 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // ✅ Ініціалізація Toolbar
+        // Ініціалізація Toolbar
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
 
-        // Ініціалізація UI
+        // Ініціалізація головного UI
         tvCity = findViewById(R.id.tvCity)
         tvTemperature = findViewById(R.id.tvTemperature)
         tvWeatherCondition = findViewById(R.id.tvWeatherCondition)
@@ -69,16 +92,27 @@ class MainActivity : AppCompatActivity() {
         rvForecast = findViewById(R.id.rvForecast)
         rvForecast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        fetchWeatherData() // Завантажуємо погоду для міста за замовчуванням (Київ)
+        // Ініціалізація UI якості повітря
+        tvAqiIcon = findViewById(R.id.tvAqiIcon)
+        tvAqiLevel = findViewById(R.id.tvAqiLevel)
+        tvAqiPM25 = findViewById(R.id.tvAqiPM25)
+        tvAqiPM10 = findViewById(R.id.tvAqiPM10)
+        tvAqiSO2 = findViewById(R.id.tvAqiSO2)
+        tvAqiNO2 = findViewById(R.id.tvAqiNO2)
+        tvAqiO3 = findViewById(R.id.tvAqiO3)
+        tvAqiCO = findViewById(R.id.tvAqiCO)
+
+        // Завантажуємо дані для міста за замовчуванням
+        fetchWeatherData()
     }
 
-    // ✅ Крок 5: Створюємо меню (іконку) на Toolbar
+    // --- Обробка Меню (Toolbar) ---
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.main_menu, menu)
         return true
     }
 
-    // ✅ Крок 6: Обробляємо натискання на іконку
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_search -> {
@@ -89,13 +123,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // --- Діалогові вікна ---
+
     /**
-     * ✅ НОВА ФУНКЦІЯ: Показ діалогу для пошуку міста
+     * Показ діалогу для пошуку міста
      */
     private fun showSearchCityDialog() {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_city, null)
 
-        // Знаходимо елементи у діалоговому вікні
         val etSearchCity = dialogView.findViewById<EditText>(R.id.etSearchCity)
         val btnPerformSearch = dialogView.findViewById<ImageButton>(R.id.btnPerformSearch)
         val btnLviv = dialogView.findViewById<Button>(R.id.btnCityLviv)
@@ -104,7 +139,6 @@ class MainActivity : AppCompatActivity() {
         val btnDnipro = dialogView.findViewById<Button>(R.id.btnCityDnipro)
         val btnKyiv = dialogView.findViewById<Button>(R.id.btnCityKyiv)
 
-        // Створюємо діалог
         val dialog = MaterialAlertDialogBuilder(this)
             .setView(dialogView)
             .setNegativeButton("Скасувати") { d, _ ->
@@ -112,7 +146,6 @@ class MainActivity : AppCompatActivity() {
             }
             .create()
 
-        // Обробник для кнопки пошуку (з поля вводу)
         btnPerformSearch.setOnClickListener {
             val query = etSearchCity.text.toString()
             if (query.isNotBlank()) {
@@ -122,127 +155,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Обробники для кнопок-шаблонів
-        btnLviv.setOnClickListener {
-            updateCityAndFetch("Lviv")
+        val cityClickListener = { cityName: String ->
+            updateCityAndFetch(cityName)
             dialog.dismiss()
         }
-        btnOdesa.setOnClickListener {
-            updateCityAndFetch("Odesa")
-            dialog.dismiss()
-        }
-        btnKharkiv.setOnClickListener {
-            updateCityAndFetch("Kharkiv")
-            dialog.dismiss()
-        }
-        btnDnipro.setOnClickListener {
-            updateCityAndFetch("Dnipro")
-            dialog.dismiss()
-        }
-        btnKyiv.setOnClickListener {
-            updateCityAndFetch("Kyiv")
-            dialog.dismiss()
-        }
+        btnLviv.setOnClickListener { cityClickListener("Lviv") }
+        btnOdesa.setOnClickListener { cityClickListener("Odesa") }
+        btnKharkiv.setOnClickListener { cityClickListener("Kharkiv") }
+        btnDnipro.setOnClickListener { cityClickListener("Dnipro") }
+        btnKyiv.setOnClickListener { cityClickListener("Kyiv") }
 
         dialog.show()
     }
 
     /**
-     * ✅ НОВА ФУНКЦІЯ: Оновлює місто та перезапускає завантаження
-     */
-    private fun updateCityAndFetch(newCity: String) {
-        this.city = newCity // Оновлюємо назву міста
-        fetchWeatherData()   // Повторно завантажуємо дані
-    }
-
-
-    private fun fetchWeatherData() {
-        val retrofit = Retrofit.Builder()
-            .baseUrl("https://api.openweathermap.org/")
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-        val weatherService = retrofit.create(WeatherApiService::class.java)
-
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                // ✅ 'city' тепер береться з оновленої змінної класу
-                val response = weatherService.getForecast(city, apiKey)
-
-                // ✅ Крок 5.2: Зберігаємо повний список тут
-                fullForecastList = response.list
-
-                val dailyForecasts = filterDailyForecasts(response.list)
-
-                withContext(Dispatchers.Main) {
-                    if (dailyForecasts.isNotEmpty()) {
-                        updateUI(dailyForecasts.first(), response.city.name)
-                    }
-
-                    // ✅ Клік-колбек для 5-денного прогнозу не змінюється
-                    forecastAdapter = ForecastAdapter(dailyForecasts) { item, position ->
-                        showWeatherDetailsDialog(item, position)
-                    }
-                    rvForecast.adapter = forecastAdapter
-                }
-            } catch (e: Exception) {
-                // ✅ Обробка помилки, якщо місто не знайдено
-                Log.e("MainActivity", "Error fetching weather data", e)
-                withContext(Dispatchers.Main) {
-                    // Можна показати помилку користувачу
-                    tvCity.text = "Помилка"
-                    tvTemperature.text = "-"
-                    tvWeatherCondition.text = "Місто не знайдено"
-                }
-            }
-        }
-    }
-
-    // ... (решта вашого коду: filterDailyForecasts, showWeatherDetailsDialog, getApiKeyFromAssets, updateUI, formatDayOfWeek, degToCompass) ...
-    // ... Вони залишаються без змін ...
-
-    /**
-     * ✅ Оновлена функція фільтрації, щоб починати з поточного дня
-     */
-    private fun filterDailyForecasts(fullList: List<WeatherListItem>): List<WeatherListItem> {
-        val dailyItems = mutableListOf<WeatherListItem>()
-        val uniqueDays = mutableSetOf<String>()
-
-        // 1. Додаємо поточний прогноз як "Сьогодні"
-        if (fullList.isNotEmpty()) {
-            val today = fullList.first()
-            dailyItems.add(today)
-            uniqueDays.add(today.dt_txt.substringBefore(" ")) // Додаємо дату, напр. "2025-10-26"
-        }
-
-        // 2. Шукаємо прогнози на 12:00 для наступних днів
-        val noonForecasts = fullList.filter {
-            val date = it.dt_txt.substringBefore(" ")
-            // Додаємо, якщо це 12:00 І ми ще не додали прогноз на цей день
-            it.dt_txt.endsWith("12:00:00") && !uniqueDays.contains(date)
-        }
-
-        // Додаємо знайдені прогнози
-        for (item in noonForecasts) {
-            val date = item.dt_txt.substringBefore(" ")
-            if (!uniqueDays.contains(date)) {
-                dailyItems.add(item)
-                uniqueDays.add(date)
-            }
-            // Обмежуємо 5-ма днями
-            if (dailyItems.size >= 5) break
-        }
-
-        return dailyItems
-    }
-
-    /**
-     * ✅ НОВА ФУНКЦІЯ: Показ спливаючого вікна з деталями
+     * Показ спливаючого вікна з деталями ТА погодинним прогнозом
      */
     private fun showWeatherDetailsDialog(item: WeatherListItem, position: Int) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_weather_details, null)
 
-        // --- 1. Заповнюємо основні дані (як і раніше) ---
+        // 1. Заповнюємо основні дані
         val tvDetailDay = dialogView.findViewById<TextView>(R.id.tvDetailDay)
-        // ... (всі ваші інші findViewById для tvDetailDescription, tvDetailTemp, тощо) ...
         val tvDetailDescription = dialogView.findViewById<TextView>(R.id.tvDetailDescription)
         val tvDetailTemp = dialogView.findViewById<TextView>(R.id.tvDetailTemp)
         val tvDetailHumidity = dialogView.findViewById<TextView>(R.id.tvDetailHumidity)
@@ -256,31 +189,22 @@ class MainActivity : AppCompatActivity() {
         tvDetailWind.text = "Вітер: ${item.wind.speed} м/с, ${degToCompass(item.wind.deg)}"
         tvDetailVisibility.text = "Видимість: ${item.visibility / 1000.0} км"
 
-
-        // --- 2. Готуємо погодинний прогноз ---
-
-        // Знаходимо дату натиснутого дня (напр., "2025-10-27")
+        // 2. Готуємо погодинний прогноз
         val clickedDate = item.dt_txt.substringBefore(" ")
-
-        // Фільтруємо ПОВНИЙ список, щоб отримати всі записи для цієї дати
         val hourlyDataForThisDay = fullForecastList.filter {
             it.dt_txt.startsWith(clickedDate)
         }
 
-        // Знаходимо наш новий RecyclerView у макеті діалогу
         val rvHourly: RecyclerView = dialogView.findViewById(R.id.rvHourlyForecast)
-
-        // Створюємо та встановлюємо новий адаптер
         val hourlyAdapter = HourlyForecastAdapter(hourlyDataForThisDay)
         rvHourly.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
         rvHourly.adapter = hourlyAdapter
 
-        // (Опціонально) Додаємо гарний розділювач
+        // Додаємо розділювач
         val divider = DividerItemDecoration(this, (rvHourly.layoutManager as LinearLayoutManager).orientation)
         rvHourly.addItemDecoration(divider)
 
-
-        // --- 3. Створюємо та показуємо діалог ---
+        // 3. Створюємо та показуємо діалог
         MaterialAlertDialogBuilder(this)
             .setView(dialogView)
             .setPositiveButton("Закрити") { dialog, _ ->
@@ -289,10 +213,138 @@ class MainActivity : AppCompatActivity() {
             .show()
     }
 
+    // --- Завантаження даних ---
+
+    /**
+     * Оновлює місто та перезапускає завантаження даних
+     */
+    private fun updateCityAndFetch(newCity: String) {
+        this.city = newCity
+        fetchWeatherData()
+    }
+
+    /**
+     * Завантажує прогноз погоди ТА якість повітря
+     */
+    private fun fetchWeatherData() {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                // 1. Отримуємо прогноз
+                val response = weatherService.getForecast(city, apiKey)
+                fullForecastList = response.list
+                val dailyForecasts = filterDailyForecasts(response.list)
+
+                // Отримуємо lat/lon з першої відповіді
+                val lat = response.city.coord.lat
+                val lon = response.city.coord.lon
+
+                // 2. Робимо другий запит для AQI
+                try {
+                    val aqiResponse = weatherService.getAirPollution(lat, lon, apiKey)
+                    withContext(Dispatchers.Main) {
+                        updateAirPollutionUI(aqiResponse)
+                    }
+                } catch (aqiError: Exception) {
+                    Log.e("MainActivity", "Error fetching AQI data", aqiError)
+                }
+
+                // 3. Оновлюємо UI прогнозу
+                withContext(Dispatchers.Main) {
+                    if (dailyForecasts.isNotEmpty()) {
+                        updateUI(dailyForecasts.first(), response.city.name)
+                    }
+                    forecastAdapter = ForecastAdapter(dailyForecasts) { item, position ->
+                        showWeatherDetailsDialog(item, position)
+                    }
+                    rvForecast.adapter = forecastAdapter
+                }
+            } catch (e: Exception) {
+                // Обробка помилки (напр., місто не знайдено)
+                Log.e("MainActivity", "Error fetching weather data", e)
+                withContext(Dispatchers.Main) {
+                    tvCity.text = "Помилка"
+                    tvTemperature.text = "-"
+                    tvWeatherCondition.text = "Місто не знайдено"
+                }
+            }
+        }
+    }
+
+    // --- Оновлення UI ---
+
+    /**
+     * Оновлює головний UI (поточна погода)
+     */
+    private fun updateUI(todayWeather: WeatherListItem, cityName: String) {
+        tvCity.text = cityName
+        tvTemperature.text = "${todayWeather.main.temp.toInt()}°"
+        tvWeatherCondition.text = todayWeather.weather.firstOrNull()?.description?.replaceFirstChar { it.uppercase() } ?: ""
+        val visibilityInKm = todayWeather.visibility / 1000.0
+        tvVisibility.text = "$visibilityInKm км"
+        // Тут також оновлюємо опис видимості, якщо потрібно
+        // tvVisibilityDesc.text = "..."
+    }
+
+    /**
+     * Оновлює UI для блоку якості повітря
+     */
+    private fun updateAirPollutionUI(response: AirPollutionResponse) {
+        val aqiItem = response.list.firstOrNull() ?: return
+
+        // 1. Оновлюємо компоненти
+        tvAqiPM25.text = String.format(Locale.US, "%.1f", aqiItem.components.pm2_5)
+        tvAqiPM10.text = String.format(Locale.US, "%.1f", aqiItem.components.pm10)
+        tvAqiSO2.text = String.format(Locale.US, "%.1f", aqiItem.components.so2)
+        tvAqiNO2.text = String.format(Locale.US, "%.1f", aqiItem.components.no2)
+        tvAqiO3.text = String.format(Locale.US, "%.1f", aqiItem.components.o3)
+        tvAqiCO.text = String.format(Locale.US, "%.0f", aqiItem.components.co)
+
+        // 2. Оновлюємо головний індекс (текст і "картинку")
+        val aqiValue = aqiItem.aqiData.aqi
+        tvAqiLevel.text = getAqiString(aqiValue)
+
+        // Встановлюємо колір для "картинки"
+        val aqiColor = getAqiColor(aqiValue)
+        // Переконуємось, що фон - це GradientDrawable, щоб змінити колір
+        val background = tvAqiIcon.background.mutate() as? GradientDrawable
+        background?.setColor(aqiColor)
+    }
+
     // --- Допоміжні функції ---
 
+    /**
+     * Фільтрує повний список, щоб отримати 5 днів
+     */
+    private fun filterDailyForecasts(fullList: List<WeatherListItem>): List<WeatherListItem> {
+        val dailyItems = mutableListOf<WeatherListItem>()
+        val uniqueDays = mutableSetOf<String>()
+
+        if (fullList.isNotEmpty()) {
+            val today = fullList.first()
+            dailyItems.add(today)
+            uniqueDays.add(today.dt_txt.substringBefore(" "))
+        }
+
+        val noonForecasts = fullList.filter {
+            val date = it.dt_txt.substringBefore(" ")
+            it.dt_txt.endsWith("12:00:00") && !uniqueDays.contains(date)
+        }
+
+        for (item in noonForecasts) {
+            val date = item.dt_txt.substringBefore(" ")
+            if (!uniqueDays.contains(date)) {
+                dailyItems.add(item)
+                uniqueDays.add(date)
+            }
+            if (dailyItems.size >= 5) break
+        }
+        return dailyItems
+    }
+
+    /**
+     * Читає API ключ з assets
+     */
     private fun getApiKeyFromAssets(): String {
-        // ... (ваш код для читання ключа залишається без змін)
         try {
             return assets.open("apiKey.json")
                 .bufferedReader()
@@ -304,17 +356,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateUI(todayWeather: WeatherListItem, cityName: String) {
-        // ... (ваш код для оновлення головного UI залишається без змін)
-        tvCity.text = cityName
-        tvTemperature.text = "${todayWeather.main.temp.toInt()}°"
-        tvWeatherCondition.text = todayWeather.weather.firstOrNull()?.description?.replaceFirstChar { it.uppercase() } ?: ""
-        val visibilityInKm = todayWeather.visibility / 1000.0
-        tvVisibility.text = "$visibilityInKm км"
-    }
-
     /**
-     * Допоміжна функція для форматування дня тижня (для діалогу)
+     * Форматує день тижня (напр., "Нд")
      */
     private fun formatDayOfWeek(dateString: String): String {
         try {
@@ -329,11 +372,40 @@ class MainActivity : AppCompatActivity() {
     }
 
     /**
-     * Допоміжна функція для конвертації градусів у напрямок вітру
+     * Конвертує градуси у напрямок вітру
      */
     private fun degToCompass(degrees: Int): String {
         val directions = listOf("Пн", "Пн-Сх", "Сх", "Пд-Сх", "Пд", "Пд-Зх", "Зх", "Пн-Зх")
         val index = (degrees % 360) / 45
         return directions[index]
+    }
+
+    /**
+     * Повертає текстовий опис для AQI
+     */
+    private fun getAqiString(aqi: Int): String {
+        return when (aqi) {
+            1 -> "Добре"
+            2 -> "Задовільно"
+            3 -> "Помірно"
+            4 -> "Погано"
+            5 -> "Дуже погано"
+            else -> "N/A"
+        }
+    }
+
+    /**
+     * Повертає колір для "картинки" AQI
+     */
+    private fun getAqiColor(aqi: Int): Int {
+        val colorId = when (aqi) {
+            1 -> R.color.aqi_good
+            2 -> R.color.aqi_fair
+            3 -> R.color.aqi_moderate
+            4 -> R.color.aqi_poor
+            5 -> R.color.aqi_very_poor
+            else -> R.color.aqi_unknown
+        }
+        return ContextCompat.getColor(this, colorId)
     }
 }

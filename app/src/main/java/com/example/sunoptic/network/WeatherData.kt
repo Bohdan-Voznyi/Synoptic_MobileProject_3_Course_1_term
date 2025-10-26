@@ -8,15 +8,16 @@ data class ForecastResponse(
 
 // Елемент списку прогнозу
 data class WeatherListItem(
-    val dt: Long, // Час прогнозу (Unix timestamp)
+    // ... (решта ваших полів: dt, main, weather, etc.) ...
+    val dt: Long,
     val main: Main,
     val weather: List<Weather>,
     val visibility: Int,
-    val dt_txt: String, // Текстова дата
-    val wind: Wind // ✅ ДОДАНО: Інформація про вітер
+    val dt_txt: String,
+    val wind: Wind
 )
 
-// Залишаємо ці класи
+// ... (Main, Weather, Wind залишаються без змін) ...
 data class Main(
     val temp: Double,
     val humidity: Int,
@@ -28,13 +29,20 @@ data class Weather(
     val icon: String
 )
 
-// ✅ ДОДАНО: Новий клас для вітру
 data class Wind(
-    val speed: Double, // Швидкість вітру, м/с
-    val deg: Int       // Напрямок вітру, градуси
+    val speed: Double,
+    val deg: Int
 )
 
-// Клас для назви міста
+
+// ✅ ДОДАНО: Новий клас для координат
+data class Coord(
+    val lat: Double,
+    val lon: Double
+)
+
+// ✅ ОНОВЛЕНО: Клас City тепер містить Coord
 data class City(
-    val name: String
+    val name: String,
+    val coord: Coord // Додаємо це поле
 )
