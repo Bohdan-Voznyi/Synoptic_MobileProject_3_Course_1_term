@@ -27,6 +27,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.appcompat.app.AlertDialog // ✅ Важливо: переконайтесь, що це не MaterialAlertDialogBuilder для .create()
+import androidx.recyclerview.widget.DividerItemDecoration // ✅ Для розділювача
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,6 +44,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var rvForecast: RecyclerView
     private lateinit var forecastAdapter: ForecastAdapter
     private lateinit var toolbar: Toolbar // ✅ Новий елемент
+
+    private var fullForecastList: List<WeatherListItem> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -163,6 +167,9 @@ class MainActivity : AppCompatActivity() {
                 // ✅ 'city' тепер береться з оновленої змінної класу
                 val response = weatherService.getForecast(city, apiKey)
 
+                // ✅ Крок 5.2: Зберігаємо повний список тут
+                fullForecastList = response.list
+
                 val dailyForecasts = filterDailyForecasts(response.list)
 
                 withContext(Dispatchers.Main) {
@@ -170,6 +177,7 @@ class MainActivity : AppCompatActivity() {
                         updateUI(dailyForecasts.first(), response.city.name)
                     }
 
+                    // ✅ Клік-колбек для 5-денного прогнозу не змінюється
                     forecastAdapter = ForecastAdapter(dailyForecasts) { item, position ->
                         showWeatherDetailsDialog(item, position)
                     }
@@ -230,18 +238,17 @@ class MainActivity : AppCompatActivity() {
      * ✅ НОВА ФУНКЦІЯ: Показ спливаючого вікна з деталями
      */
     private fun showWeatherDetailsDialog(item: WeatherListItem, position: Int) {
-        // Надуваємо макет
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_weather_details, null)
 
-        // Знаходимо TextView у макеті
+        // --- 1. Заповнюємо основні дані (як і раніше) ---
         val tvDetailDay = dialogView.findViewById<TextView>(R.id.tvDetailDay)
+        // ... (всі ваші інші findViewById для tvDetailDescription, tvDetailTemp, тощо) ...
         val tvDetailDescription = dialogView.findViewById<TextView>(R.id.tvDetailDescription)
         val tvDetailTemp = dialogView.findViewById<TextView>(R.id.tvDetailTemp)
         val tvDetailHumidity = dialogView.findViewById<TextView>(R.id.tvDetailHumidity)
         val tvDetailWind = dialogView.findViewById<TextView>(R.id.tvDetailWind)
         val tvDetailVisibility = dialogView.findViewById<TextView>(R.id.tvDetailVisibility)
 
-        // Встановлюємо дані
         tvDetailDay.text = if (position == 0) "Сьогодні" else formatDayOfWeek(item.dt_txt)
         tvDetailDescription.text = item.weather.firstOrNull()?.description?.replaceFirstChar { it.uppercase() } ?: "N/A"
         tvDetailTemp.text = "${item.main.temp.toInt()}°"
@@ -249,7 +256,31 @@ class MainActivity : AppCompatActivity() {
         tvDetailWind.text = "Вітер: ${item.wind.speed} м/с, ${degToCompass(item.wind.deg)}"
         tvDetailVisibility.text = "Видимість: ${item.visibility / 1000.0} км"
 
-        // Створюємо та показуємо діалог
+
+        // --- 2. Готуємо погодинний прогноз ---
+
+        // Знаходимо дату натиснутого дня (напр., "2025-10-27")
+        val clickedDate = item.dt_txt.substringBefore(" ")
+
+        // Фільтруємо ПОВНИЙ список, щоб отримати всі записи для цієї дати
+        val hourlyDataForThisDay = fullForecastList.filter {
+            it.dt_txt.startsWith(clickedDate)
+        }
+
+        // Знаходимо наш новий RecyclerView у макеті діалогу
+        val rvHourly: RecyclerView = dialogView.findViewById(R.id.rvHourlyForecast)
+
+        // Створюємо та встановлюємо новий адаптер
+        val hourlyAdapter = HourlyForecastAdapter(hourlyDataForThisDay)
+        rvHourly.layoutManager = LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        rvHourly.adapter = hourlyAdapter
+
+        // (Опціонально) Додаємо гарний розділювач
+        val divider = DividerItemDecoration(this, (rvHourly.layoutManager as LinearLayoutManager).orientation)
+        rvHourly.addItemDecoration(divider)
+
+
+        // --- 3. Створюємо та показуємо діалог ---
         MaterialAlertDialogBuilder(this)
             .setView(dialogView)
             .setPositiveButton("Закрити") { dialog, _ ->
