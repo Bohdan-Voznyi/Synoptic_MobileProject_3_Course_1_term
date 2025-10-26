@@ -3,8 +3,14 @@ package com.example.sunoptic
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu // ✅ Імпорт
+import android.view.MenuItem // ✅ Імпорт
+import android.widget.Button // ✅ Імпорт
+import android.widget.EditText // ✅ Імпорт
+import android.widget.ImageButton // ✅ Імпорт
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar // ✅ Імпорт
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.sunoptic.network.ForecastResponse
@@ -25,7 +31,8 @@ import java.util.Locale
 class MainActivity : AppCompatActivity() {
 
     private lateinit var apiKey: String
-    private val city = "Kyiv"
+    // ✅ Змінюємо 'val' на 'var', щоб мати змогу оновлювати місто
+    private var city = "Kyiv"
 
     // Елементи UI
     private lateinit var tvCity: TextView
@@ -34,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvVisibility: TextView
     private lateinit var rvForecast: RecyclerView
     private lateinit var forecastAdapter: ForecastAdapter
+    private lateinit var toolbar: Toolbar // ✅ Новий елемент
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,6 +53,10 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        // ✅ Ініціалізація Toolbar
+        toolbar = findViewById(R.id.toolbar)
+        setSupportActionBar(toolbar)
+
         // Ініціалізація UI
         tvCity = findViewById(R.id.tvCity)
         tvTemperature = findViewById(R.id.tvTemperature)
@@ -53,8 +65,91 @@ class MainActivity : AppCompatActivity() {
         rvForecast = findViewById(R.id.rvForecast)
         rvForecast.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
 
-        fetchWeatherData()
+        fetchWeatherData() // Завантажуємо погоду для міста за замовчуванням (Київ)
     }
+
+    // ✅ Крок 5: Створюємо меню (іконку) на Toolbar
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        return true
+    }
+
+    // ✅ Крок 6: Обробляємо натискання на іконку
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.action_search -> {
+                showSearchCityDialog()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    /**
+     * ✅ НОВА ФУНКЦІЯ: Показ діалогу для пошуку міста
+     */
+    private fun showSearchCityDialog() {
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_search_city, null)
+
+        // Знаходимо елементи у діалоговому вікні
+        val etSearchCity = dialogView.findViewById<EditText>(R.id.etSearchCity)
+        val btnPerformSearch = dialogView.findViewById<ImageButton>(R.id.btnPerformSearch)
+        val btnLviv = dialogView.findViewById<Button>(R.id.btnCityLviv)
+        val btnOdesa = dialogView.findViewById<Button>(R.id.btnCityOdesa)
+        val btnKharkiv = dialogView.findViewById<Button>(R.id.btnCityKharkiv)
+        val btnDnipro = dialogView.findViewById<Button>(R.id.btnCityDnipro)
+        val btnKyiv = dialogView.findViewById<Button>(R.id.btnCityKyiv)
+
+        // Створюємо діалог
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setView(dialogView)
+            .setNegativeButton("Скасувати") { d, _ ->
+                d.dismiss()
+            }
+            .create()
+
+        // Обробник для кнопки пошуку (з поля вводу)
+        btnPerformSearch.setOnClickListener {
+            val query = etSearchCity.text.toString()
+            if (query.isNotBlank()) {
+                updateCityAndFetch(query)
+                dialog.dismiss()
+            }
+        }
+
+        // Обробники для кнопок-шаблонів
+        btnLviv.setOnClickListener {
+            updateCityAndFetch("Lviv")
+            dialog.dismiss()
+        }
+        btnOdesa.setOnClickListener {
+            updateCityAndFetch("Odesa")
+            dialog.dismiss()
+        }
+        btnKharkiv.setOnClickListener {
+            updateCityAndFetch("Kharkiv")
+            dialog.dismiss()
+        }
+        btnDnipro.setOnClickListener {
+            updateCityAndFetch("Dnipro")
+            dialog.dismiss()
+        }
+        btnKyiv.setOnClickListener {
+            updateCityAndFetch("Kyiv")
+            dialog.dismiss()
+        }
+
+        dialog.show()
+    }
+
+    /**
+     * ✅ НОВА ФУНКЦІЯ: Оновлює місто та перезапускає завантаження
+     */
+    private fun updateCityAndFetch(newCity: String) {
+        this.city = newCity // Оновлюємо назву міста
+        fetchWeatherData()   // Повторно завантажуємо дані
+    }
+
 
     private fun fetchWeatherData() {
         val retrofit = Retrofit.Builder()
@@ -65,29 +160,36 @@ class MainActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
+                // ✅ 'city' тепер береться з оновленої змінної класу
                 val response = weatherService.getForecast(city, apiKey)
 
-                // ✅ Оновлена логіка фільтрації
                 val dailyForecasts = filterDailyForecasts(response.list)
 
                 withContext(Dispatchers.Main) {
-                    // Оновлюємо головний екран погодою на "сьогодні" (перший елемент списку)
                     if (dailyForecasts.isNotEmpty()) {
                         updateUI(dailyForecasts.first(), response.city.name)
                     }
 
-                    // ✅ Передаємо лямбда-функцію в адаптер
                     forecastAdapter = ForecastAdapter(dailyForecasts) { item, position ->
-                        // Це виконається при натисканні на елемент
                         showWeatherDetailsDialog(item, position)
                     }
                     rvForecast.adapter = forecastAdapter
                 }
             } catch (e: Exception) {
+                // ✅ Обробка помилки, якщо місто не знайдено
                 Log.e("MainActivity", "Error fetching weather data", e)
+                withContext(Dispatchers.Main) {
+                    // Можна показати помилку користувачу
+                    tvCity.text = "Помилка"
+                    tvTemperature.text = "-"
+                    tvWeatherCondition.text = "Місто не знайдено"
+                }
             }
         }
     }
+
+    // ... (решта вашого коду: filterDailyForecasts, showWeatherDetailsDialog, getApiKeyFromAssets, updateUI, formatDayOfWeek, degToCompass) ...
+    // ... Вони залишаються без змін ...
 
     /**
      * ✅ Оновлена функція фільтрації, щоб починати з поточного дня

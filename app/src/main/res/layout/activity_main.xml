@@ -1,97 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
     android:background="#2E333C"
-    android:padding="16dp"
-    tools:context=".MainActivity">
+    android:fitsSystemWindows="true"  tools:context=".MainActivity">
 
-    <TextView
-        android:id="@+id/tvCity"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Київ"
-        android:textColor="@android:color/white"
-        android:textSize="34sp"
-        android:layout_gravity="center_horizontal"/>
-
-    <TextView
-        android:id="@+id/tvTemperature"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="10°"
-        android:textColor="@android:color/white"
-        android:textSize="50sp"
-        android:layout_gravity="center_horizontal"/>
-
-    <TextView
-        android:id="@+id/tvWeatherCondition"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Изморось"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="20sp"
-        android:layout_gravity="center_horizontal"/>
-
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        app:cardBackgroundColor="#40454E"
-        app:cardCornerRadius="12dp">
+        android:background="#2E333C"
+        app:elevation="0dp">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            app:titleTextColor="@android:color/white"
+            app:title="" /> </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="16dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="ВИДИМОСТЬ"
-                android:textColor="@android:color/darker_gray"
-                android:textSize="12sp"/>
-            <TextView
-                android:id="@+id/tvVisibility"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="4 ми"
-                android:textColor="@android:color/white"
-                android:textSize="28sp"/>
-            <TextView
-                android:id="@+id/tvVisibilityDesc"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Видимость снижена из-за легкой дымки."
-                android:textColor="@android:color/white"
-                android:textSize="14sp"/>
-        </LinearLayout>
-    </androidx.cardview.widget.CardView>
 
-    <!--
-        ✅ НОВИЙ БЛОК: Прогноз на 5 днів
-    -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ПРОГНОЗ"
-        android:textColor="@android:color/darker_gray"
-        android:textSize="12sp"
-        android:layout_marginTop="24dp"
-        android:layout_marginHorizontal="16dp"
-    />
-    <!-- Додано горизонтальні відступи -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvForecast"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-        tools:listitem="@layout/forecast_item"
-        android:layout_marginTop="8dp"
-        android:clipToPadding="false"
-        android:paddingHorizontal="8dp"
-    /> <!-- Невеликий відступ по боках, щоб картки не "прилипали" -->
-</LinearLayout>
+            <TextView
+                android:id="@+id/tvCity"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Київ"
+                android:textColor="@android:color/white"
+                android:textSize="34sp"
+                android:layout_gravity="center_horizontal"/>
+
+            <TextView
+                android:id="@+id/tvTemperature"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="10°"
+                android:textColor="@android:color/white"
+                android:textSize="50sp"
+                android:layout_gravity="center_horizontal"/>
+
+            <TextView
+                android:id="@+id/tvWeatherCondition"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Изморось"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="20sp"
+                android:layout_gravity="center_horizontal"/>
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                app:cardBackgroundColor="#40454E"
+                app:cardCornerRadius="12dp">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ВИДИМОСТЬ"
+                        android:textColor="@android:color/darker_gray"
+                        android:textSize="12sp"/>
+                    <TextView
+                        android:id="@+id/tvVisibility"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="4 ми"
+                        android:textColor="@android:color/white"
+                        android:textSize="28sp"/>
+                    <TextView
+                        android:id="@+id/tvVisibilityDesc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Видимость снижена из-за легкой дымки."
+                        android:textColor="@android:color/white"
+                        android:textSize="14sp"/>
+                </LinearLayout>
+            </androidx.cardview.widget.CardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="ПРОГНОЗ"
+                android:textColor="@android:color/darker_gray"
+                android:textSize="12sp"
+                android:layout_marginTop="24dp"
+                android:layout_marginHorizontal="16dp"
+                />
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvForecast"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                tools:listitem="@layout/forecast_item"
+                android:layout_marginTop="8dp"
+                android:clipToPadding="false"
+                android:paddingHorizontal="8dp"
+                />
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
