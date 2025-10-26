@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Макет для спливаючого вікна з деталями -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:background="#2E333C">
+
+    <!-- День тижня -->
+    <TextView
+        android:id="@+id/tvDetailDay"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        tools:text="Сьогодні" />
+
+    <!-- Опис, напр. "Невеликий дощ" -->
+    <TextView
+        android:id="@+id/tvDetailDescription"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="18sp"
+        android:layout_marginTop="4dp"
+        tools:text="Невеликий дощ" />
+
+    <!-- Температура -->
+    <TextView
+        android:id="@+id/tvDetailTemp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="16dp"
+        tools:text="10°" />
+
+    <!-- Розділювач -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#40454E"
+        android:layout_marginTop="20dp"
+        android:layout_marginBottom="20dp"/>
+
+    <!-- Блок з деталями -->
+    <TextView
+        android:id="@+id/tvDetailHumidity"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        tools:text="Вологість: 92%" />
+
+    <TextView
+        android:id="@+id/tvDetailWind"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:layout_marginTop="12dp"
+        tools:text="Вітер: 5.5 м/с, Пд-Зх" />
+
+    <TextView
+        android:id="@+id/tvDetailVisibility"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@android:color/white"
+        android:textSize="16sp"
+        android:layout_marginTop="12dp"
+        tools:text="Видимість: 10.0 км" />
+
+</LinearLayout>

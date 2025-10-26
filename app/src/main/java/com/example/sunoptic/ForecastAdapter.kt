@@ -9,43 +9,56 @@ import com.example.sunoptic.network.WeatherListItem
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class ForecastAdapter(private val forecastList: List<WeatherListItem>) :
+// ✅ Крок 1: Додаємо лямбда-функцію 'onItemClick' до конструктора
+class ForecastAdapter(
+    private val forecastList: List<WeatherListItem>,
+    private val onItemClick: (WeatherListItem, Int) -> Unit // Передаємо елемент та позицію
+) :
     RecyclerView.Adapter<ForecastAdapter.ForecastViewHolder>() {
 
-    // Створює новий View (елемент списку)
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ForecastViewHolder {
         val view = LayoutInflater.from(parent.context)
             .inflate(R.layout.forecast_item, parent, false)
         return ForecastViewHolder(view)
     }
 
-    // Заповнює View даними
+    // ✅ Крок 2: Передаємо позицію до 'bind'
     override fun onBindViewHolder(holder: ForecastViewHolder, position: Int) {
         val forecastItem = forecastList[position]
-        holder.bind(forecastItem)
+        holder.bind(forecastItem, position, onItemClick) // Передаємо клік-колбек
     }
 
-    // Повертає кількість елементів у списку
     override fun getItemCount() = forecastList.size
 
-    // Внутрішній клас, який "тримає" елементи UI
     class ForecastViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvDayOfWeek: TextView = itemView.findViewById(R.id.tvDayOfWeek)
         private val tvTemp: TextView = itemView.findViewById(R.id.tvTemp)
 
-        fun bind(item: WeatherListItem) {
+        // ✅ Крок 3: Оновлюємо 'bind'
+        fun bind(
+            item: WeatherListItem,
+            position: Int,
+            onItemClick: (WeatherListItem, Int) -> Unit
+        ) {
             tvTemp.text = "${item.main.temp.toInt()}°"
-            tvDayOfWeek.text = formatDayOfWeek(item.dt_txt)
+
+            // ✅ Крок 4: Перший елемент - "Сьогодні", решта - дні тижня
+            if (position == 0) {
+                tvDayOfWeek.text = "Сьогодні"
+            } else {
+                tvDayOfWeek.text = formatDayOfWeek(item.dt_txt)
+            }
+
+            // ✅ Крок 5: Встановлюємо слухач натискань
+            itemView.setOnClickListener {
+                onItemClick(item, position)
+            }
         }
 
-        // Допоміжна функція для форматування дати у день тижня
         private fun formatDayOfWeek(dateString: String): String {
             try {
-                // Парсимо дату з формату "2025-10-26 12:00:00"
                 val parser = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
                 val date = parser.parse(dateString)
-
-                // Форматуємо у день тижня (напр. "Нд")
                 val formatter = SimpleDateFormat("E", Locale("uk", "UA"))
                 return formatter.format(date).replaceFirstChar { it.uppercase() }
             } catch (e: Exception) {
