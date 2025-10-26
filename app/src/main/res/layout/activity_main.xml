@@ -69,4 +69,29 @@
                 android:textSize="14sp"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
+
+    <!--
+        ✅ НОВИЙ БЛОК: Прогноз на 5 днів
+    -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ПРОГНОЗ"
+        android:textColor="@android:color/darker_gray"
+        android:textSize="12sp"
+        android:layout_marginTop="24dp"
+        android:layout_marginHorizontal="16dp"
+    />
+    <!-- Додано горизонтальні відступи -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvForecast"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        tools:listitem="@layout/forecast_item"
+        android:layout_marginTop="8dp"
+        android:clipToPadding="false"
+        android:paddingHorizontal="8dp"
+    /> <!-- Невеликий відступ по боках, щоб картки не "прилипали" -->
 </LinearLayout>
