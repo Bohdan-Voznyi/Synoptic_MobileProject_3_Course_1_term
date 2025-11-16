@@ -142,27 +142,33 @@
                 android:textColor="@android:color/darker_gray"
                 android:textSize="12sp"
                 android:layout_marginTop="24dp"
-                android:layout_marginHorizontal="16dp"
-                />
+                android:layout_marginHorizontal="16dp"/>
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardAqi"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
                 app:cardBackgroundColor="#40454E"
-                app:cardCornerRadius="12dp">
+                app:strokeColor="#2E333C"
+                app:strokeWidth="1dp"
+                android:maxHeight="200dp"
+            >
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="16dp">
+                    android:orientation="vertical">
 
+                    <!-- Заголовок аккордеона -->
                     <LinearLayout
+                        android:id="@+id/accordionHeader"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
+                        android:orientation="horizontal"
+                        android:padding="16dp"
+                        android:gravity="center_vertical">
 
                         <TextView
                             android:id="@+id/tvAqiIcon"
@@ -183,156 +189,178 @@
                             android:textColor="@android:color/white"
                             android:textSize="22sp"
                             android:textStyle="bold"
-                            tools:text="Добре" />
+                            tools:text="Добре"/>
+
+                        <!-- Space для отталкивания стрелки вправо -->
+                        <Space
+                            android:layout_width="0dp"
+                            android:layout_height="0dp"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/ivAccordionArrow"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@drawable/ic_expand_more"
+                            />
                     </LinearLayout>
 
-                    <View
+                    <!-- Содержимое аккордеона -->
+                    <LinearLayout
+                        android:id="@+id/accordionContent"
                         android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="#2E333C"
-                        android:layout_marginVertical="16dp"/>
+                        android:layout_height="0dp"
+                        android:orientation="vertical"
+                        android:visibility="gone"
+                        android:paddingHorizontal="16dp"
+                        android:paddingBottom="16dp">
 
-                    <GridLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:columnCount="3"
-                        android:rowCount="2"
-                        android:useDefaultMargins="true">
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#2E333C"
+                            android:layout_marginVertical="16dp"/>
 
-                        <!-- PM2.5 -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
+                        <GridLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_gravity="center_horizontal"
-                            android:padding="4dp">
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="PM2.5"
-                                style="@style/AqiComponentTitle"/>
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:id="@+id/tvAqiPM25"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                style="@style/AqiComponentValue"
-                                tools:text="10.5"/>
-                        </LinearLayout>
+                            android:columnCount="3"
+                            android:rowCount="2"
+                            android:alignmentMode="alignMargins"
+                            android:useDefaultMargins="true">
 
-                        <!-- PM10 -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_gravity="center_horizontal"
-                            android:padding="4dp">
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <!-- PM2.5 -->
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="PM10"
-                                style="@style/AqiComponentTitle"/>
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:id="@+id/tvAqiPM10"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                style="@style/AqiComponentValue"
-                                tools:text="15.2"/>
-                        </LinearLayout>
+                                android:layout_columnWeight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="4dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="PM2.5"
+                                    style="@style/AqiComponentTitle"/>
+                                <TextView
+                                    android:id="@+id/tvAqiPM25"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/AqiComponentValue"
+                                    tools:text="10.5"/>
+                            </LinearLayout>
 
-                        <!-- SO₂ -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_gravity="center_horizontal"
-                            android:padding="4dp">
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <!-- PM10 -->
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="SO₂"
-                                style="@style/AqiComponentTitle"/>
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:id="@+id/tvAqiSO2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                style="@style/AqiComponentValue"
-                                tools:text="2.1"/>
-                        </LinearLayout>
+                                android:layout_columnWeight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="4dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="PM10"
+                                    style="@style/AqiComponentTitle"/>
+                                <TextView
+                                    android:id="@+id/tvAqiPM10"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/AqiComponentValue"
+                                    tools:text="15.2"/>
+                            </LinearLayout>
 
-                        <!-- NO₂ -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_gravity="center_horizontal"
-                            android:padding="4dp">
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <!-- SO₂ -->
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="NO₂"
-                                style="@style/AqiComponentTitle"/>
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:id="@+id/tvAqiNO2"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                style="@style/AqiComponentValue"
-                                tools:text="5.5"/>
-                        </LinearLayout>
+                                android:layout_columnWeight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="4dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="SO₂"
+                                    style="@style/AqiComponentTitle"/>
+                                <TextView
+                                    android:id="@+id/tvAqiSO2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/AqiComponentValue"
+                                    tools:text="2.1"/>
+                            </LinearLayout>
 
-                        <!-- O₃ -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_gravity="center_horizontal"
-                            android:padding="4dp">
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <!-- NO₂ -->
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="O₃"
-                                style="@style/AqiComponentTitle"/>
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:id="@+id/tvAqiO3"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                style="@style/AqiComponentValue"
-                                tools:text="70.1"/>
-                        </LinearLayout>
+                                android:layout_columnWeight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="4dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="NO₂"
+                                    style="@style/AqiComponentTitle"/>
+                                <TextView
+                                    android:id="@+id/tvAqiNO2"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/AqiComponentValue"
+                                    tools:text="5.5"/>
+                            </LinearLayout>
 
-                        <!-- CO -->
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:layout_gravity="center_horizontal"
-                            android:padding="4dp">
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:layout_width="wrap_content"
+                            <!-- O₃ -->
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                android:text="CO"
-                                style="@style/AqiComponentTitle"/>
-                            <!-- ✅ ВИПРАВЛЕНО: Додано layout_width/height -->
-                            <TextView
-                                android:id="@+id/tvAqiCO"
-                                android:layout_width="wrap_content"
+                                android:layout_columnWeight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="4dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="O₃"
+                                    style="@style/AqiComponentTitle"/>
+                                <TextView
+                                    android:id="@+id/tvAqiO3"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/AqiComponentValue"
+                                    tools:text="70.1"/>
+                            </LinearLayout>
+
+                            <!-- CO -->
+                            <LinearLayout
+                                android:layout_width="0dp"
                                 android:layout_height="wrap_content"
-                                style="@style/AqiComponentValue"
-                                tools:text="200.0"/>
-                        </LinearLayout>
-                    </GridLayout>
+                                android:layout_columnWeight="1"
+                                android:orientation="vertical"
+                                android:gravity="center"
+                                android:padding="4dp">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="CO"
+                                    style="@style/AqiComponentTitle"/>
+                                <TextView
+                                    android:id="@+id/tvAqiCO"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    style="@style/AqiComponentValue"
+                                    tools:text="200.0"/>
+                            </LinearLayout>
+
+                        </GridLayout>
+                    </LinearLayout>
                 </LinearLayout>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
+
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

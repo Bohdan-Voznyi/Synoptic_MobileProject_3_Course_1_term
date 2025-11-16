@@ -1,5 +1,7 @@
 package com.example.sunoptic
 
+import android.animation.Animator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -11,10 +13,12 @@ import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -107,11 +111,51 @@ class MainActivity : AppCompatActivity() {
 
         val accordionHeader = findViewById<LinearLayout>(R.id.accordionHeader)
         val accordionContent = findViewById<LinearLayout>(R.id.accordionContent)
+        val arrow = findViewById<ImageView>(R.id.ivAccordionArrow)
+
+// Максимальная высота раскрытия (в пикселях)
+        val maxHeightPx = (200 * resources.displayMetrics.density).toInt() // 200dp
 
         accordionHeader.setOnClickListener {
-            accordionContent.visibility =
-                if (accordionContent.visibility == View.GONE) View.VISIBLE else View.GONE
+            if (accordionContent.visibility == View.GONE) {
+                // Развернуть
+                accordionContent.visibility = View.VISIBLE
+                accordionContent.measure(
+                    LinearLayout.LayoutParams.MATCH_PARENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                // Ограничиваем высоту
+                val targetHeight = minOf(accordionContent.measuredHeight, maxHeightPx)
+                accordionContent.layoutParams.height = 0
+
+                val animator = ValueAnimator.ofInt(0, targetHeight)
+                animator.addUpdateListener { valueAnimator ->
+                    accordionContent.layoutParams.height = valueAnimator.animatedValue as Int
+                    accordionContent.requestLayout()
+                }
+                animator.duration = 300
+                animator.start()
+
+                arrow.animate().rotation(180f).setDuration(300).start()
+            } else {
+                // Сворачиваем
+                val initialHeight = accordionContent.height
+                val animator = ValueAnimator.ofInt(initialHeight, 0)
+                animator.addUpdateListener { valueAnimator ->
+                    accordionContent.layoutParams.height = valueAnimator.animatedValue as Int
+                    accordionContent.requestLayout()
+                }
+                animator.doOnEnd {
+                    accordionContent.visibility = View.GONE
+                }
+                animator.duration = 300
+                animator.start()
+
+                arrow.animate().rotation(0f).setDuration(300).start()
+            }
         }
+
+
 
         // Завантажуємо дані для міста за замовчуванням
         fetchWeatherData()
