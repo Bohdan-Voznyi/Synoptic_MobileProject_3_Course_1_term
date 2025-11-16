@@ -3,6 +3,9 @@ package com.example.sunoptic
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
+import android.content.DialogInterface
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
@@ -196,11 +199,19 @@ class MainActivity : AppCompatActivity() {
 
         val dialog = MaterialAlertDialogBuilder(this)
             .setView(dialogView)
-            .setNegativeButton("Скасувати") { d, _ ->
-                d.dismiss()
-            }
+            .setNegativeButton("Закрити", null) // Сначала передаем null
             .create()
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.parseColor("#40454E")))
 
+        dialog.show()
+
+        // Настроим кастомный стиль для кнопки "Скасувати"
+        val negativeButton = dialog.getButton(DialogInterface.BUTTON_NEGATIVE)
+        negativeButton.setTextColor(Color.WHITE)
+        negativeButton.setPadding(20, 10, 20, 10)
+        negativeButton.setOnClickListener { dialog.dismiss() }
+
+        // Обработчик поиска
         btnPerformSearch.setOnClickListener {
             val query = etSearchCity.text.toString()
             if (query.isNotBlank()) {
@@ -209,7 +220,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Обробники для кнопок-шаблонів
+        // Обработчики кнопок-шаблонов
         val cityClickListener = { cityName: String ->
             updateCityAndFetch(cityName)
             dialog.dismiss()
@@ -219,9 +230,8 @@ class MainActivity : AppCompatActivity() {
         btnKharkiv.setOnClickListener { cityClickListener("Kharkiv") }
         btnDnipro.setOnClickListener { cityClickListener("Dnipro") }
         btnKyiv.setOnClickListener { cityClickListener("Kyiv") }
-
-        dialog.show()
     }
+
 
     /**
      * Показ спливаючого вікна з деталями ТА погодинним прогнозом
@@ -261,12 +271,21 @@ class MainActivity : AppCompatActivity() {
         rvHourly.addItemDecoration(divider)
 
         // 3. Створюємо та показуємо діалог
-        MaterialAlertDialogBuilder(this)
+        val dialog = MaterialAlertDialogBuilder(this)
             .setView(dialogView)
-            .setPositiveButton("Закрити") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
+            .setPositiveButton("Закрити", null) // Сначала null, будем настраивать после show()
+            .create()
+
+        dialog.show()
+
+// Убираем стандартный белый фон окна
+        dialog.window?.setBackgroundDrawable(ColorDrawable(Color.parseColor("#40454E")))
+
+// Настраиваем кнопку "Закрити"
+        val positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
+        positiveButton.setTextColor(Color.WHITE)
+        positiveButton.setPadding(20, 10, 20, 10)
+        positiveButton.setOnClickListener { dialog.dismiss() }
     }
 
     // --- Завантаження даних ---
