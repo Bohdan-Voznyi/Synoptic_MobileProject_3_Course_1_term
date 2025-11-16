@@ -2,20 +2,21 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="100dp"
-    android:layout_height="wrap_content"
+    android:layout_width="140dp"
+    android:layout_height="140dp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
 
     app:cardBackgroundColor="#40454E"  app:cardCornerRadius="12dp"        android:layout_margin="8dp">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:orientation="vertical"
         android:gravity="center_horizontal"
         android:padding="12dp">
 
-        <TextView
+
+    <TextView
             android:id="@+id/tvDayOfWeek"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -32,6 +33,26 @@
             android:textStyle="bold"
             android:layout_marginTop="8dp"
             tools:text="10°" />
+
+        <TextView
+            android:id="@+id/tvForecastHumidity"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Вологість: 70%"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            android:layout_gravity="center_horizontal"/>
+
+        <TextView
+            android:id="@+id/tvForecastWind"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Вітер: Пн"
+            android:textColor="@android:color/darker_gray"
+            android:textSize="14sp"
+            android:layout_marginTop="4dp"
+            android:layout_gravity="center_horizontal"/>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
