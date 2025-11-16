@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">Sunoptic</string>
+    <string name="app_name" translatable="false">Sunoptic</string>
+    <string name="kiev">Київ</string>
+    <string name="drizzle">Изморось</string>
+    <string name="visibility">ВИДИМОСТЬ</string>
+
 </resources>

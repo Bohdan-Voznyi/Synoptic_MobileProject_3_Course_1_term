@@ -1,14 +1,17 @@
 package com.example.sunoptic
 
+import android.annotation.SuppressLint
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
@@ -102,6 +105,14 @@ class MainActivity : AppCompatActivity() {
         tvAqiO3 = findViewById(R.id.tvAqiO3)
         tvAqiCO = findViewById(R.id.tvAqiCO)
 
+        val accordionHeader = findViewById<LinearLayout>(R.id.accordionHeader)
+        val accordionContent = findViewById<LinearLayout>(R.id.accordionContent)
+
+        accordionHeader.setOnClickListener {
+            accordionContent.visibility =
+                if (accordionContent.visibility == View.GONE) View.VISIBLE else View.GONE
+        }
+
         // Завантажуємо дані для міста за замовчуванням
         fetchWeatherData()
     }
@@ -171,6 +182,7 @@ class MainActivity : AppCompatActivity() {
     /**
      * Показ спливаючого вікна з деталями ТА погодинним прогнозом
      */
+    @SuppressLint("SetTextI18n")
     private fun showWeatherDetailsDialog(item: WeatherListItem, position: Int) {
         val dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_weather_details, null)
 

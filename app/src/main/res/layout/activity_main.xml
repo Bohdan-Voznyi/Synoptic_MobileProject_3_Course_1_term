@@ -38,29 +38,41 @@
             android:padding="16dp">
 
             <!-- Поточна погода -->
-            <TextView
-                android:id="@+id/tvCity"
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Київ"
-                android:textColor="@android:color/white"
-                android:textSize="34sp"
-                android:layout_gravity="center_horizontal"/>
+                android:orientation="horizontal"
+                android:gravity="center_horizontal"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:baselineAligned="false">
 
-            <TextView
-                android:id="@+id/tvTemperature"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="10°"
-                android:textColor="@android:color/white"
-                android:textSize="50sp"
-                android:layout_gravity="center_horizontal"/>
+                <TextView
+                    android:id="@+id/tvCity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/kiev"
+                    android:textColor="@android:color/white"
+                    android:textSize="34sp"
+                    android:layout_gravity="center_vertical"/>
+
+                <TextView
+                    android:id="@+id/tvTemperature"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="10°"
+                    android:textColor="@android:color/white"
+                    android:textSize="34sp"
+                    android:layout_marginStart="10dp"
+                    android:layout_gravity="center_vertical"/>
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/tvWeatherCondition"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Изморось"
+                android:text="@string/drizzle"
                 android:textColor="@android:color/darker_gray"
                 android:textSize="20sp"
                 android:layout_gravity="center_horizontal"/>
@@ -80,7 +92,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="ВИДИМОСТЬ"
+                        android:text="@string/visibility"
                         android:textColor="@android:color/darker_gray"
                         android:textSize="12sp"/>
                     <TextView
